@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000",
-    "start": "NODE_ENV=production node --import tsx server/index.ts"
-    "start:dev": "tsx watch src/server/index.ts",
+  "dev": "vite --port 3000",
+  "start": "NODE_ENV=production node --import tsx server/index.ts",
+  "start:dev": "tsx watch src/server/index.ts",
+  ...
+}
     "server": "tsx src/server/index.ts",
     "server:dev": "tsx watch src/server/index.ts",
     "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
