@@ -12,7 +12,21 @@ export default defineConfig({
 		"import.meta.env.TENANT_ID": JSON.stringify(process.env.TENANT_ID || ""),
 	},
 	plugins: [
-		...creaoPlugins(),
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+// Creao plugins only run inside Creao editor
+const isCreao = process.env.CREAO === "true";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    ...(isCreao ? [] : [])
+  ],
+  build: {
+    outDir: "dist"
+  }
+});
 		TanStackRouterVite({
 			autoCodeSplitting: false, // affects pick-n-edit feature. disabled for now.
 		}),
