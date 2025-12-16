@@ -1,71 +1,9 @@
-import { resolve } from "node:path";
-import tailwindcss from "@tailwindcss/vite";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import svgr from "vite-plugin-svgr";
+const { defineConfig } = require("vite");
+const react = require("@vitejs/plugin-react");
 
-// https://vitejs.dev/config/
-export default defineConfig({
-	base: process.env.TENANT_ID ? `/${process.env.TENANT_ID}/` : "./",
-	define: {
-		"import.meta.env.TENANT_ID": JSON.stringify(process.env.TENANT_ID || ""),
-	},
-	plugins: [
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
-// Creao plugins only run inside Creao editor
-const isCreao = process.env.CREAO === "true";
-
-export default defineConfig({
-  plugins: [
-    react(),
-    ...(isCreao ? [] : [])
-  ],
+module.exports = defineConfig({
+  plugins: [react()],
   build: {
-    outDir: "dist"
-  }
-});
-		TanStackRouterVite({
-			autoCodeSplitting: false, // affects pick-n-edit feature. disabled for now.
-		}),
-		viteReact({
-			jsxRuntime: "automatic",
-		}),
-		svgr(),
-		tailwindcss(),
-	],
-	resolve: {
-		alias: {
-			"@": resolve(__dirname, "./src"),
-		},
-	},
-	server: {
-		host: "0.0.0.0",
-		port: 3000,
-		allowedHosts: true, // respond to *any* Host header
-		watch: {
-			usePolling: true,
-			interval: 300, // ms; tune if CPU gets high
-		},
-		// Proxy API routes to the Express backend server in development
-		proxy: {
-			"/creao/store": {
-				target: "http://localhost:3001",
-				changeOrigin: true,
-			},
-			"/api": {
-				target: "http://localhost:3001",
-				changeOrigin: true,
-			},
-			"/health": {
-				target: "http://localhost:3001",
-				changeOrigin: true,
-			},
-		},
-	},
-	build: {
-		chunkSizeWarningLimit: 1500,
-	},
+    outDir: "dist",
+  },
 });
