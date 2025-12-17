@@ -12,6 +12,9 @@
     "build": "npm run check:safe && vite build",
     "build:only": "vite build",
     "serve": "vite preview",
-    "prod": "npm run build:only && npm run start"
-  }
+    "prod": "npm run build:only && npm run start""dependencies": {
+  "express": "^5.2.1",
+  "cors": "^2.8.5",
+  "tsx": "^4.20.6"
 }
+  }
