@@ -1,22 +1,17 @@
-"scripts": {
-  "dev": "vite --port 3000",
-  "start": "NODE_ENV=production node --import tsx server/index.ts",
-  "start:dev": "tsx watch src/server/index.ts",
-  "server": "tsx src/server/index.ts",
-  "server:dev": "tsx watch src/server/index.ts",
-  "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
-  "build": "npm run check:safe && vite build",
-  "build:only": "vite build",
-  "serve": "vite preview",
-  "prod": "npm run build:only && npm run start",
-  "test": "vitest run --config vitest.config.js",
-  "test:smoke": "vitest run --config vitest.config.js test/template-tests/suites/b1-hello-world.test.ts",
-  "check": "tsgo --noEmit && npm run lint:radix -- --fix && npm run format",
-  "check:safe": "timeout 20 npm run check || (echo 'Check timed out after 20 seconds' && exit 1)",
-  "format": "biome check --write --unsafe",
-  "format:quiet": "biome check --write --unsafe --log-level=warn",
-  "lint:radix": "grep -l -r '<SelectItem' src | xargs eslint --config config/eslint/eslint.radix.config.js",
-  "lint:mcp": "eslint src --config config/eslint/eslint.mcp.config.js",
-  "lint:validate": "node config/eslint/validate-configs.js",
-  "prepare": "if [ -f ./bin/setup-githooks.sh ]; then ./bin/setup-githooks.sh; fi"
+{
+  "name": "basic_template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "start": "NODE_ENV=production node --import tsx server/index.ts",
+    "start:dev": "tsx watch src/server/index.ts",
+    "server": "tsx src/server/index.ts",
+    "server:dev": "tsx watch src/server/index.ts",
+    "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
+    "build": "npm run check:safe && vite build",
+    "build:only": "vite build",
+    "serve": "vite preview",
+    "prod": "npm run build:only && npm run start"
+  }
 }
