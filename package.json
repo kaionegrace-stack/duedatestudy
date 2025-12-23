@@ -5,16 +5,16 @@
   "scripts": {
     "dev": "vite --port 3000",
     "start": "NODE_ENV=production node --import tsx server/index.ts",
-    "start:dev": "tsx watch src/server/index.ts",
-    "server": "tsx src/server/index.ts",
-    "server:dev": "tsx watch src/server/index.ts",
+    "start:dev": "tsx watch server/index.ts",
+    "server": "tsx server/index.ts",
+    "server:dev": "tsx watch server/index.ts",
     "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
-    "build": "npm run check:safe && vite build",
     "build:only": "vite build",
-    "serve": "vite preview",
-    "prod": "npm run build:only && npm run start""dependencies": {
-  "express": "^5.2.1",
-  "cors": "^2.8.5",
-  "tsx": "^4.20.6"
-}
+    "prod": "npm run build:only && npm run start"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.5",
+    "tsx": "^4.20.6"
   }
+}
