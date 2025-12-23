@@ -1,20 +1,14 @@
 {
-  "name": "basic_template",
+  "name": "duedatestudy",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
-   "start": "NODE_ENV=production node --import tsx server/index.ts",
-    "start:dev": "tsx watch server/index.ts",
-    "server": "tsx server/index.ts",
-    "server:dev": "tsx watch server/index.ts",
-    "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
-    "build:only": "vite build",
-    "prod": "npm run build:only && npm run start"
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "dependencies": {
-    "express": "^5.2.1",
-    "cors": "^2.8.5",
-    "tsx": "^4.20.6"
+  "dependencies": {},
+  "devDependencies": {
+    "vite": "^5.0.0"
   }
 }
