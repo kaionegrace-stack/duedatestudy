@@ -3,8 +3,9 @@ import ReactDOM from "react-dom/client";
 
 function App() {
   return (
-    <div style={{ padding: "2rem", fontSize: "24px" }}>
-      🎉 Duedate Study is Live!
+    <div style={{ padding: "2rem", fontFamily: "Arial" }}>
+      <h1>📚 Due Date Study</h1>
+      <p>Your app is live and working!</p>
     </div>
   );
 }
