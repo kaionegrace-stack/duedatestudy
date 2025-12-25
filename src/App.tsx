@@ -1,177 +1,133 @@
 import { useEffect, useState } from "react";
 
+type User = {
+  id: number;
+  email: string;
+};
+
 type Task = {
   id: number;
   title: string;
   dueDate: string;
 };
 
+const API = import.meta.env.PROD ? "" : "http://localhost:3001";
+
 export default function App() {
+  const [user, setUser] = useState<User | null>(
+    JSON.parse(localStorage.getItem("user") || "null")
+  );
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [view, setView] = useState<"list" | "calendar">("list");
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("tasks");
-    if (saved) setTasks(JSON.parse(saved));
-  }, []);
+    if (!user) return;
 
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    fetch(`${API}/api/tasks/${user.id}`)
+      .then(res => res.json())
+      .then(setTasks);
+  }, [user]);
 
-  const addTask = () => {
-    if (!title || !dueDate) return;
-    setTasks([...tasks, { id: Date.now(), title, dueDate }]);
+  async function login(endpoint: "login" | "register") {
+    const res = await fetch(`${API}/api/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return alert(data.error);
+
+    localStorage.setItem("user", JSON.stringify(data));
+    setUser(data);
+  }
+
+  function logout() {
+    localStorage.removeItem("user");
+    setUser(null);
+    setTasks([]);
+  }
+
+  async function addTask() {
+    const res = await fetch(`${API}/api/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        dueDate,
+        userId: user!.id
+      })
+    });
+
+    const task = await res.json();
+    setTasks([...tasks, task]);
     setTitle("");
     setDueDate("");
-  };
+  }
 
-  const tasksByDate = tasks.reduce<Record<string, Task[]>>((acc, task) => {
-    acc[task.dueDate] = acc[task.dueDate] || [];
-    acc[task.dueDate].push(task);
-    return acc;
-  }, {});
+  async function deleteTask(id: number) {
+    await fetch(`${API}/api/tasks/${id}`, { method: "DELETE" });
+    setTasks(tasks.filter(t => t.id !== id));
+  }
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  if (!user) {
+    return (
+      <div style={{ padding: 40 }}>
+        <h1>🔐 Login / Register</h1>
+
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <br />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <br /><br />
+
+        <button onClick={() => login("login")}>Login</button>
+        <button onClick={() => login("register")}>Register</button>
+      </div>
+    );
+  }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>📅 DueDate Study</h1>
+    <div style={{ padding: 40 }}>
+      <h1>📚 Due Date Study App</h1>
+      <p>Logged in as {user.email}</p>
+      <button onClick={logout}>Logout</button>
 
-        <div style={styles.toggle}>
-          <button onClick={() => setView("list")}>List</button>
-          <button onClick={() => setView("calendar")}>Calendar</button>
-        </div>
+      <hr />
 
-        <div style={styles.form}>
-          <input
-            style={styles.input}
-            placeholder="Assignment"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-          />
-          <input
-            style={styles.input}
-            type="date"
-            value={dueDate}
-            onChange={e => setDueDate(e.target.value)}
-          />
-          <button style={styles.button} onClick={addTask}>
-            Add
-          </button>
-        </div>
+      <input
+        placeholder="Task"
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+      />
+      <input
+        type="date"
+        value={dueDate}
+        onChange={e => setDueDate(e.target.value)}
+      />
+      <button onClick={addTask}>Add</button>
 
-        {view === "list" && (
-          <div>
-            {tasks.map(task => (
-              <div key={task.id} style={styles.task}>
-                <strong>{task.title}</strong>
-                <span>{task.dueDate}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {view === "calendar" && (
-          <div style={styles.calendar}>
-            {[...Array(daysInMonth)].map((_, i) => {
-              const date = new Date(year, month, i + 1)
-                .toISOString()
-                .slice(0, 10);
-
-              return (
-                <div key={date} style={styles.day}>
-                  <div style={styles.dayNum}>{i + 1}</div>
-                  {tasksByDate[date]?.map(task => (
-                    <div key={task.id} style={styles.calendarTask}>
-                      {task.title}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <ul>
+        {tasks.map(t => (
+          <li key={t.id}>
+            {t.title} — {t.dueDate}
+            <button onClick={() => deleteTask(t.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#f1f5f9",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  card: {
-    background: "#fff",
-    maxWidth: "700px",
-    width: "100%",
-    padding: "2rem",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
-  },
-  title: {
-    textAlign: "center" as const,
-    marginBottom: "1rem"
-  },
-  toggle: {
-    display: "flex",
-    gap: "0.5rem",
-    justifyContent: "center",
-    marginBottom: "1rem"
-  },
-  form: {
-    display: "flex",
-    gap: "0.5rem",
-    marginBottom: "1rem"
-  },
-  input: {
-    flex: 1,
-    padding: "0.6rem",
-    borderRadius: "8px",
-    border: "1px solid #ddd"
-  },
-  button: {
-    padding: "0.6rem 1rem",
-    borderRadius: "8px",
-    border: "none",
-    background: "#4f46e5",
-    color: "white",
-    cursor: "pointer"
-  },
-  task: {
-    padding: "0.5rem",
-    borderBottom: "1px solid #eee"
-  },
-  calendar: {
-    display: "grid",
-    gridTemplateColumns: "repeat(7, 1fr)",
-    gap: "0.5rem"
-  },
-  day: {
-    minHeight: "90px",
-    border: "1px solid #eee",
-    borderRadius: "8px",
-    padding: "0.25rem"
-  },
-  dayNum: {
-    fontSize: "0.75rem",
-    opacity: 0.6
-  },
-  calendarTask: {
-    fontSize: "0.75rem",
-    background: "#e0e7ff",
-    padding: "0.2rem",
-    borderRadius: "4px",
-    marginTop: "0.2rem"
-  }
-};
