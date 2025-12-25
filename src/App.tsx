@@ -8,7 +8,7 @@ type Task = {
 
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [view, setView] = useState<"list" | "calendar">("list");
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
 
@@ -28,29 +28,26 @@ export default function App() {
     setDueDate("");
   };
 
-  const startEdit = (task: Task) => {
-    setEditingId(task.id);
-    setTitle(task.title);
-    setDueDate(task.dueDate);
-  };
+  const tasksByDate = tasks.reduce<Record<string, Task[]>>((acc, task) => {
+    acc[task.dueDate] = acc[task.dueDate] || [];
+    acc[task.dueDate].push(task);
+    return acc;
+  }, {});
 
-  const saveEdit = () => {
-    setTasks(tasks.map(t =>
-      t.id === editingId ? { ...t, title, dueDate } : t
-    ));
-    setEditingId(null);
-    setTitle("");
-    setDueDate("");
-  };
-
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter(t => t.id !== id));
-  };
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h1 style={styles.title}>📘 DueDate Study</h1>
+        <h1 style={styles.title}>📅 DueDate Study</h1>
+
+        <div style={styles.toggle}>
+          <button onClick={() => setView("list")}>List</button>
+          <button onClick={() => setView("calendar")}>Calendar</button>
+        </div>
 
         <div style={styles.form}>
           <input
@@ -65,25 +62,42 @@ export default function App() {
             value={dueDate}
             onChange={e => setDueDate(e.target.value)}
           />
-          <button
-            style={styles.button}
-            onClick={editingId ? saveEdit : addTask}
-          >
-            {editingId ? "Save" : "Add"}
+          <button style={styles.button} onClick={addTask}>
+            Add
           </button>
         </div>
 
-        {tasks.map(task => (
-          <div key={task.id} style={styles.task}>
-            <div onClick={() => startEdit(task)} style={{ cursor: "pointer" }}>
-              <strong>{task.title}</strong>
-              <div style={{ opacity: 0.7 }}>{task.dueDate}</div>
-            </div>
-            <button style={styles.delete} onClick={() => deleteTask(task.id)}>
-              ✕
-            </button>
+        {view === "list" && (
+          <div>
+            {tasks.map(task => (
+              <div key={task.id} style={styles.task}>
+                <strong>{task.title}</strong>
+                <span>{task.dueDate}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+
+        {view === "calendar" && (
+          <div style={styles.calendar}>
+            {[...Array(daysInMonth)].map((_, i) => {
+              const date = new Date(year, month, i + 1)
+                .toISOString()
+                .slice(0, 10);
+
+              return (
+                <div key={date} style={styles.day}>
+                  <div style={styles.dayNum}>{i + 1}</div>
+                  {tasksByDate[date]?.map(task => (
+                    <div key={task.id} style={styles.calendarTask}>
+                      {task.title}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -99,7 +113,7 @@ const styles = {
   },
   card: {
     background: "#fff",
-    maxWidth: "480px",
+    maxWidth: "700px",
     width: "100%",
     padding: "2rem",
     borderRadius: "16px",
@@ -107,7 +121,13 @@ const styles = {
   },
   title: {
     textAlign: "center" as const,
-    marginBottom: "1.5rem"
+    marginBottom: "1rem"
+  },
+  toggle: {
+    display: "flex",
+    gap: "0.5rem",
+    justifyContent: "center",
+    marginBottom: "1rem"
   },
   form: {
     display: "flex",
@@ -129,17 +149,29 @@ const styles = {
     cursor: "pointer"
   },
   task: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    background: "#f9fafb",
-    marginBottom: "0.5rem"
+    padding: "0.5rem",
+    borderBottom: "1px solid #eee"
   },
-  delete: {
-    background: "transparent",
-    border: "none",
-    cursor: "pointer"
+  calendar: {
+    display: "grid",
+    gridTemplateColumns: "repeat(7, 1fr)",
+    gap: "0.5rem"
+  },
+  day: {
+    minHeight: "90px",
+    border: "1px solid #eee",
+    borderRadius: "8px",
+    padding: "0.25rem"
+  },
+  dayNum: {
+    fontSize: "0.75rem",
+    opacity: 0.6
+  },
+  calendarTask: {
+    fontSize: "0.75rem",
+    background: "#e0e7ff",
+    padding: "0.2rem",
+    borderRadius: "4px",
+    marginTop: "0.2rem"
   }
 };
